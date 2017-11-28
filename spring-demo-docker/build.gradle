@@ -1,0 +1,59 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.3.3.RELEASE")
+        classpath('se.transmode.gradle:gradle-docker:1.2')
+    }
+}
+
+group = "alexandregama"
+
+apply plugin: 'docker'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+
+jar {
+    baseName = 'procurando-ape-web'
+    version =  '0.0.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+   compile("org.springframework.boot:spring-boot-starter-web")
+    compile group: 'junit', name: 'junit', version: '4.12'
+	compile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
+	compile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+	compile group: 'org.hibernate', name: 'hibernate-core', version: '5.2.1.Final'
+	compile group: 'org.hibernate', name: 'hibernate-validator', version: '5.2.4.Final'
+	compile group: 'mysql', name: 'mysql-connector-java', version: '6.0.3'
+    compile("org.springframework.boot:spring-boot-devtools")
+    compile("org.apache.tomcat.embed:tomcat-embed-jasper")
+	    
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+}
+
+task buildDocker(type: Docker, dependsOn: build) {
+  push = true
+  applicationName = jar.baseName
+  dockerfile = file('docker/Dockerfile')
+  doFirst {
+    copy {
+      from jar
+      into stageDir
+    }
+  }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.3'
+}
